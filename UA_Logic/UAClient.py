@@ -202,6 +202,7 @@ class UAclient:
     sub = []
     rsub = []
     goodcl = False
+    constatus = False
 
 
     def getclient(self, uaclient):
@@ -223,12 +224,12 @@ class UAclient:
             self.client.connect()
             nprintf('服务连接成功！')
             log.info(r'服务连接成功')
-            Values.clstatus = True
+            self.constatus = True
             self.goodcl = True
         except BaseException as e:
             nprintf("服务器连接错误:"+str(e), level="ERROR")
             log.error('服务器连接错误:'+ str(e))
-            Values.clstatus = False
+            self.constatus = False
 
     def keepalive(self):
         while Values.winexit:
@@ -236,7 +237,7 @@ class UAclient:
                 try:
                     self.client.get_endpoints()
                 except:
-                    Values.clstatus = False
+                    self.constatus = False
                     log.error('服务断开重连')
                     nprintf('服务断开重连，请重新订阅数据点')
                     self.unsub()
@@ -247,15 +248,16 @@ class UAclient:
 
     def ClientDisconnect(self):
         try:
-            self.client.disconnect()
-            log.info("断开连接成功！")
-            nprintf("断开连接成功！")
-            Values.clstatus = False
-            self.goodcl = False
+            if self.constatus == True:
+                self.client.disconnect()
+                log.info("断开连接成功！")
+                nprintf("断开连接成功！")
+                self.constatus = False
+                self.goodcl = False
         except BaseException as e:
             nprintf("断开连接失败!"+str(e))
             log.error("断开错误："+str(e))
-            Values.clstatus = False
+            self.constatus = False
             self.goodcl = False
     #添加订阅
     # def create_sub(self, timeout=0):

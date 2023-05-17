@@ -33,7 +33,7 @@ class ShowClientDlg(QDialog, Ui_Clientinit):#显示服务器设置窗体
 
     def clinit(self):
         Values.cl.goodcl = False
-        if Values.clstatus:
+        if Values.cl.constatus:
             Values.cl.ClientDisconnect()
         uaclient['ip'] = self.ClientIP.text()
         uaclient['port'] = self.Clientport.text()
@@ -41,7 +41,7 @@ class ShowClientDlg(QDialog, Ui_Clientinit):#显示服务器设置窗体
         #UA创建服务器实例
         if(Values.cl.getclient(uaclient)):#初始化
             Values.cl.ClientConnect()
-        if Values.clstatus:
+        if Values.cl.constatus:
             self.close()
 
 
@@ -112,7 +112,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         self.setupUi(self)
         sys.stdout = Stream(newText=self.onUpdateEdit)  # 输出流
         #主界面
-        Values.clstatus = False #初始化服务连接状态
         self.Clientset.triggered.connect(self.showClDlg)#菜单栏服务器设置响应事件
         self.IOlistset.setCheckable(True)
         self.IOlistset.triggered.connect(lambda : self.showIODlg(self.IOlistset))#菜单栏点表设置相应事件,lambda用于传递参数的函数
@@ -184,8 +183,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
             print(e)
 
 
-
-
     def zread(self):
         node = self.Node.toPlainText()
         att = self.attr.toPlainText()
@@ -208,10 +205,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         Values.winexit = False
-        if Values.clstatus:
-            Values.cl.ClientDisconnect()
-        if Values.bcl.client != '':
-            Values.bcl.ClientDisconnect()
+        Values.cl.ClientDisconnect()
+        Values.bcl.ClientDisconnect()
         exit(0)
 
     def showb10soc(self):
