@@ -1,4 +1,4 @@
-from wdq import logger
+from LogForRuntime import logger
 import time
 @logger
 def a():

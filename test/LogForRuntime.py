@@ -25,6 +25,7 @@ class Logger:
             _log = logging.getLogger(filename)
             _log.setLevel('DEBUG')
             _log.addHandler(self.file_handler)
+            _log.addHandler(self.stream_handler)
             logs[filename] = _log
             return _log
 
@@ -37,7 +38,8 @@ def logger(fname):
             t_start = time.time()
             res = func(*args, **kwargs)
             t_end = time.time()
-            _log.debug('{} 函数被执行 调用参数: {} {} 返回值: {} 执行耗时: {} 秒'.format(func.__name__, args, kwargs, res, t_end-t_start))
+            _log.debug('执行函数: {} 调用参数: {} {} 返回值: {} 执行耗时: {} 秒'.format
+                       (func.__name__, args if len(args)>0 else 'None', kwargs if len(kwargs)>0 else 'None', res, t_end-t_start))
         return infunc
     return out_log
 
@@ -57,6 +59,12 @@ def fff():
     print('fff test')
 
 if __name__ == '__main__':
+    '''
+        from xxx.py import logger
+        @logger(logfilename)
+        def func():
+            pass
+    '''
     func1('527sdss')
     func()
     fff()
