@@ -44,9 +44,6 @@ class ShowClientDlg(QDialog, Ui_Clientinit):#显示服务器设置窗体
         if Values.cl.constatus:
             self.close()
 
-
-
-
 class ShowIOlistDlg(QDialog, Ui_IOlistinit):#显示点表设置窗体
     def __init__(self, parent=None):
         super(ShowIOlistDlg, self).__init__(parent)
@@ -207,7 +204,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         Values.winexit = False
         Values.cl.ClientDisconnect()
         Values.bcl.ClientDisconnect()
-        exit(0)
+        print('退出中......')
+        import time
+        time.sleep(1)
+        sys.exit(0)
 
     def showb10soc(self):
         dlg = showbeijing10dlg(self)

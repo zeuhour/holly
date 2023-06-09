@@ -27,5 +27,6 @@ sub_node = {} #‘完整点名’：‘设备描述及属性名’
 '''
 rc_subnode = {}
 rc_DOdesp = {}
+rc_nodes = {}
 
 winexit = True

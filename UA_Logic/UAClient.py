@@ -75,11 +75,8 @@ def DIauto(uac, cond, value, wtime):
                     if res:
                         nprintf(str(sheet.cell_value(row, Values.colnum['设备编号']))+'\t' +sheet.cell_value(row,Values.colnum['属性描述']) +'\t' + sheet.cell_value(row, Values.colnum['比特数值' + str(value) + '描述']))
                     time.sleep(int(wtime))
-
-
         nprintf('执行完成')
         log.info("完成DI写值")
-
     except BaseException as e:
         log.error(str(e))
         nprintf(str(e), level='ERROR')
@@ -124,15 +121,29 @@ class SubHandler(object):
     #订阅节点变化响应方法:回调函数
     def datachange_notification(self, node, val, attr):
         try:
-            nprintf(f"{Values.sub_node[str(node)][0]} :{node} 值:{val} {Values.iolist.cell_value(Values.sub_node[str(node)][1], Values.colnum[f'比特数值{str(int(val))}描述'])}")
+            nprintf(f"{Values.sub_node[str(node)][0]} :{node} 值:{val} {Values.iolist.cell_value(Values.sub_node[str(node)][1], Values.colnum[f'比特数值{str(int(val))}描述']) if f'比特数值{str(int(val))}描述' in Values.colnum.keys() else '无对应值描述'}")
         except Exception as e:
             print("回调函数异常", e)
+
+class rcHandler(object):
+    def datachange_notification(self, node, val ,attr):
+        node = str(node)
+        val = int(val)
+        nprintf(f'{node} 接收值:{val}')
+        try:
+            for rc in range(len(Values.rc_subnode[node][val])):
+                Values.bcl.write_node(Values.rc_subnode[node][val][rc][0], Values.rc_subnode[node][val][rc][1])
+                # v = Values.cl.client.get_node(node)
+                # v.set_value(val)
+        except BaseException as e:
+            nprintf(f"{node} 值 {val} 未配置返校点")
+
 
 class returncheckHandler(object):
     def datachange_notification(self, node, val, attr):
         node = str(node)
         val = int(val)
-        nprintf(f'{node} 已接收值:{val} {Values.rc_DOdesp[node][val]}')  # \n执行反校:{Values.rc_subnode[node][val][rc][0]} = {Values.rc_subnode[node][val][rc][1]}
+        nprintf(f'{node} 接收值:{val} {Values.rc_DOdesp[node][val]}')  # \n执行反校:{Values.rc_subnode[node][val][rc][0]} = {Values.rc_subnode[node][val][rc][1]}
         log.info(f'{node} 接收值：{val} {Values.rc_DOdesp[node][val]}')  # \n执行反校:{Values.rc_subnode[node][val][rc][0]} = {Values.rc_subnode[node][val][rc][1]}
         with threading.Lock():
             try:
@@ -191,7 +202,6 @@ def checkip(ip:str) ->bool:
                 return False
     except:
         return False
-
     return True
 
 class UAclient:
@@ -199,6 +209,8 @@ class UAclient:
     client = ''
     Hander = SubHandler()
     rcHander = returncheckHandler()
+    returncheckhandler = rcHandler()
+    rcnodes = []
     sub = []
     rsub = []
     goodcl = False
@@ -271,13 +283,22 @@ class UAclient:
                 va = self.su.subscribe_data_change(self.client.get_node(node))
                 self.sub.append(va)
             except:
-                log.error('订阅失败：' + Values.sub_node[node]+'：'+node)
+                log.error(f'订阅失败： {Values.sub_node[node]}：{node}')
 
     def rc_subnode(self, timeout=0):
         '''
         根据Values.rc_subnode 使用自动返校回调函数订阅，当接收变位自动调用回调函数返校
         :return:
         '''
+        self.rc = self.client.create_subscription(timeout, self.rcHander)
+        for node in Values.rc_subnode.keys():
+            try:
+                var = self.rc.subscribe_data_change(self.client.get_node(node))
+                self.rsub.append(var)
+            except Exception as e:
+                log.error('订阅失败 {} {}'.format(node, str(e)))
+
+    def auto_returncheck(self, timeout = 0):
         self.rc = self.client.create_subscription(timeout, self.rcHander)
         for node in Values.rc_subnode.keys():
             try:
