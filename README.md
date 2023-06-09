@@ -1,4 +1,4 @@
 # holly
-基于OPC UA的Hollysys产品自动化测试工具
+Test tool for macs scada4
 
 start with launch.py
