@@ -204,10 +204,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         Values.winexit = False
         Values.cl.ClientDisconnect()
         Values.bcl.ClientDisconnect()
-        print('退出中......')
-        import time
-        time.sleep(1)
-        sys.exit(0)
+        # print('退出中......')
+        # import time
+        # time.sleep(1)
+        # sys.exit(0)
 
     def showb10soc(self):
         dlg = showbeijing10dlg(self)
