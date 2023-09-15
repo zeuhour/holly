@@ -10,7 +10,6 @@ from PyQt5.QtGui import QTextCursor
 from PyQt5.QtCore import QObject, pyqtSignal
 from threading import Thread
 from beijing10 import Logic, global_values
-
 import os
 
 
@@ -51,11 +50,12 @@ class ShowIOlistDlg(QDialog, Ui_IOlistinit):#显示点表设置窗体
         self.filesel.setCheckable(True)
         self.filesel.clicked.connect(lambda: self.click_find_file_path(self.filesel))#点击打开文件选择窗口
         self.IOlistok.accepted.connect(self.iolistinit)#确定按钮点击执行点表初始化
-
     def click_find_file_path(self, button):
         # 设置文件扩展名过滤，同一个类型的不同格式如xlsx和xls 用空格隔开
-        filename, filetype = QFileDialog.getOpenFileName(self, "选择点表", "../",
+        filename, filetype = QFileDialog.getOpenFileName(self, "选择点表", Values.lastpath,
                                                          "Excel Files (*.xls *.xlsx)")
+        Values.lastpath = filename[:filename.rfind('/')+1]
+        
         if button.text() == "..":
             if button.isChecked():
                 self.excel_path = filename
@@ -121,6 +121,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         self.actionview.triggered.connect(self.printdock.show)
         self.dbunitchange.clicked.connect(self.changeunit)
         self.beijing10.triggered.connect(self.showb10soc)
+        self.jiexi.clicked.connect(self.baowenjiexi)
+        self.actionclear.triggered.connect(self.clearOutText)
         if not os.path.exists("./template"):
             os.mkdir("./template")
         t = Thread(target=Values.cl.keepalive)  # 服务连接守护线程，断开自动重连
@@ -200,6 +202,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         except BaseException as e:
             print(e)
 
+    def baowenjiexi(self):
+        s = self.baowen.toPlainText()
+        if s:
+            s = s.replace('\n','').replace(' ','')
+            try:
+                j = 0
+                num = ''
+                hex16 = []
+
+                for l in range(len(s)):
+                    num = num + s[l]
+                    j += 1
+                    if j > 3:
+                        hex16.append(num)
+                        num = ''
+                        j = 0
+
+                print('寄存器\t|16进制\t|2进制\t\t|10进制\t|高8位\t|低8位\t|unicode转码')
+                for i in range(len(hex16)):
+                    print(str(i+1),end='\t|')
+                    print(hex16[i], end = '\t|')
+                    print('{:04b}'.format(int(hex16[i][0],16)),'{:04b}'.format(int(hex16[i][1],16)),'{:04b}'.format(int(hex16[i][2],16)),'{:04b}'.format(int(hex16[i][3],16)),end='\t|')
+
+                    print(str(int(hex16[i], 16)) + '\t|' + str(int(hex16[i][0] + hex16[i][1], 16)), '\t|',
+                        int(hex16[i][2] + hex16[i][3], 16),end='\t|')
+                    try:                        
+                        print(('\\u'+hex16[i]).encode().decode('unicode_escape'))
+                    except:
+                        print("error")
+                    print('-'*120)
+                print('**')
+            except Exception as e:
+                print(e)
+            
+
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         Values.winexit = False
         Values.cl.ClientDisconnect()
@@ -227,6 +264,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
             self.IOlist2.clear()
             self.IOlist1.addItems(Values.colnum.keys())
             self.IOlist2.addItems(Values.colnum.keys())
+
+    def clearOutText(self):
+        self.OutText.clear()
 
     def onUpdateEdit(self, text):
         cursor = self.OutText.textCursor()

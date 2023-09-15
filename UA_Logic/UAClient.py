@@ -335,7 +335,7 @@ class UAclient:
             var = self.client.get_node("ns=" + dbunit + ";s=" + node + "." + attr)
             v = var.get_value()
             nprintf('UAClient::get_Value:'+str(var) + ' = ' + str(v))
-            log.info('UAClient::get_Value:'+str(var) + ' = ' + str(v))
+            #log.info('UAClient::get_Value:'+str(var) + ' = ' + str(v))
             return v
         except BaseException as e:
             nprintf('UAClient::get_Value:'+str(e), level='ERROR')
@@ -353,7 +353,7 @@ class UAclient:
                                                                varianttype=var.get_data_type_as_variant_type())))
             #var.set_value(value)
             nprintf(str(var) + ' = ' + str(value))
-            log.info(str(var) + ' = ' + str(value))
+            #log.info(str(var) + ' = ' + str(value))
             return True
         except BaseException as e:
             nprintf('UAClient::set_Value:' + str(e), level='ERROR')
@@ -371,15 +371,15 @@ class UAclient:
         try:
             var = self.client.get_node(node + "." + attr)
             var.set_value(value)
-            print(str(var) + ' = ' + str(value))
+            nprintf(str(var) + ' = ' + str(value))
         except BaseException as e:
-            print("UAClient-write ERROR!", e)
+            nprintf("UAClient-write ERROR!", e)
 
     def write_node(self, node, value):
         try:
             var = self.client.get_node(node)
             var.set_attribute(ua.AttributeIds.Value, ua.DataValue(variant=ua.Variant(value=value, varianttype=var.get_data_type_as_variant_type())))
-            log.info(f'写点：{node} = {value}')
+            #log.info(f'写点：{node} = {value}')
             nprintf(f'写点：{node} = {value}')
         except BaseException as e:
             nprintf(f'写点错误:{str(e)}{str(node)} = {value}', level='ERROR')

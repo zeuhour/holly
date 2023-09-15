@@ -5,6 +5,7 @@ uaclient = {
     "port" : "",
     "unit" : ""
 }
+lastpath = './'
 #服务UA实例
 cl = UAclient()
 bcl = UAclient()
