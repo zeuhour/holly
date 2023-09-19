@@ -204,12 +204,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
 
     def baowenjiexi(self):
         s = self.baowen.toPlainText()
-        import datetime
-        st = datetime.datetime.now()
-        for i in range(1000):            
-            print(f'------------------------------{i}')
-        en = datetime.datetime.now()
-        print(en-st)
         if s:
             s = ''.join(filter(str.isalnum, s))
             try:
@@ -225,7 +219,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                         num = ''
                         j = 0
 
-                print('寄存器\t|16进制\t|2进制\t\t|10进制\t|高8位\t|低8位\t|unicode转码')
+                print('寄存器\t|16进制\t|2进制\t\t|10进制\t|高8位\t|低8位\t|unicode')
                 print('-'*110)
                 for i in range(len(hex16)):
                     print(str(i+1),end='\t| ')
