@@ -204,8 +204,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
 
     def baowenjiexi(self):
         s = self.baowen.toPlainText()
+        import datetime
+        st = datetime.datetime.now()
+        for i in range(1000):            
+            print(f'------------------------------{i}')
+        en = datetime.datetime.now()
+        print(en-st)
         if s:
-            s = s.replace('\n','').replace(' ','')
+            s = ''.join(filter(str.isalnum, s))
             try:
                 j = 0
                 num = ''
@@ -220,18 +226,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                         j = 0
 
                 print('寄存器\t|16进制\t|2进制\t\t|10进制\t|高8位\t|低8位\t|unicode转码')
+                print('-'*110)
                 for i in range(len(hex16)):
-                    print(str(i+1),end='\t|')
-                    print(hex16[i], end = '\t|')
-                    print('{:04b}'.format(int(hex16[i][0],16)),'{:04b}'.format(int(hex16[i][1],16)),'{:04b}'.format(int(hex16[i][2],16)),'{:04b}'.format(int(hex16[i][3],16)),end='\t|')
+                    print(str(i+1),end='\t| ')
+                    print(hex16[i], end = '\t| ')
+                    print('{:04b}'.format(int(hex16[i][0],16)),'{:04b}'.format(int(hex16[i][1],16)),'{:04b}'.format(int(hex16[i][2],16)),'{:04b}'.format(int(hex16[i][3],16)),end='\t| ')
 
-                    print(str(int(hex16[i], 16)) + '\t|' + str(int(hex16[i][0] + hex16[i][1], 16)), '\t|',
-                        int(hex16[i][2] + hex16[i][3], 16),end='\t|')
+                    print(str(int(hex16[i], 16)) + '\t| ' + str(int(hex16[i][0] + hex16[i][1], 16)), '\t| '+
+                        str(int(hex16[i][2] + hex16[i][3], 16)),end='\t|')
                     try:                        
                         print(('\\u'+hex16[i]).encode().decode('unicode_escape'))
                     except:
                         print("error")
-                    print('-'*120)
+                    print('-'*110)
                 print('**')
             except Exception as e:
                 print(e)
