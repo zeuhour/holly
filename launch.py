@@ -183,22 +183,38 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
 
 
     def zread(self):
-        node = self.Node.toPlainText()
+        nodes = self.Node.toPlainText().replace('\n', '').split(',')
         att = self.attr.toPlainText()
         try:
-            Values.cl.get_Value(node, att)
+            for node in nodes:
+                if ':' in node:
+                    node = node.split(':')
+                    Values.cl.get_Value(node[1], att, dbunit=node[0])
+                else:
+                    Values.cl.get_Value(node, att)
         except BaseException as e:
             print(e)
 
     def zwrite(self):
-        node = self.Node.toPlainText()
+        nodes = self.Node.toPlainText().replace('\n', '').split(',')
         att = self.attr.toPlainText()
         val = self.value.toPlainText()
-        try:
+        try:            
             if '.' in val:
-                Values.cl.set_Value(node, att, float(val))
+                for node in nodes:
+                    if ':' in node:
+                        node = node.split(':')
+                        Values.cl.set_Value(node[1], att, float(val), dbunit=node[0])
+                    else:
+                        Values.cl.set_Value(node, att, float(val))
             else:
-                Values.cl.set_Value(node, att, int(val))
+                for node in nodes:
+                    if ':' in node:
+                        node = node.split(':')
+                        Values.cl.set_Value(node[1], att, int(val), dbunit=node[0])
+                    else:
+                        Values.cl.set_Value(node, att, int(val))
+
         except BaseException as e:
             print(e)
 
@@ -219,7 +235,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                         num = ''
                         j = 0
 
-                print('寄存器\t|16进制\t|2进制\t\t|10进制\t|高8位\t|低8位\t|unicode')
+                print('寄存器\t| 16进制\t| 2进制\t\t| 10进制\t| 高8位\t| 低8位\t| unicode')
                 print('-'*110)
                 for i in range(len(hex16)):
                     print(str(i+1),end='\t| ')
@@ -229,7 +245,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                     print(str(int(hex16[i], 16)) + '\t| ' + str(int(hex16[i][0] + hex16[i][1], 16)), '\t| '+
                         str(int(hex16[i][2] + hex16[i][3], 16)),end='\t|')
                     try:                        
-                        print(('\\u'+hex16[i]).encode().decode('unicode_escape'))
+                        print(' '+('\\u'+hex16[i]).encode().decode('unicode_escape'))
                     except:
                         print("error")
                     print('-'*110)

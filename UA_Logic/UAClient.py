@@ -251,7 +251,11 @@ class UAclient:
                 except:
                     self.constatus = False
                     log.error('服务断开重连')
-                    nprintf('服务断开重连，请重新订阅数据点')
+                    nprintf('服务断开重连中')
+                    if self.sub:
+                        nprintf("订阅失效，请重新订阅")
+                        self.sub=[]
+                        self.su.delete()
                     self.unsub()
                     self.unrcsub()
                     self.ClientConnect()

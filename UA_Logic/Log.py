@@ -24,4 +24,3 @@ def logg():
     logger.addHandler(file_handler)
 
     return logger
-
