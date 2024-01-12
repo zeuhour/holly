@@ -123,22 +123,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         self.beijing10.triggered.connect(self.showb10soc)
         self.jiexi.clicked.connect(self.baowenjiexi)
         self.actionclear.triggered.connect(self.clearOutText)
-        if not os.path.exists("./template"):
-            os.mkdir("./template")
+       
         t = Thread(target=Values.cl.keepalive)  # 服务连接守护线程，断开自动重连
         t.setDaemon(True)
         t.start()
 
     def createsub(self):
         try:
-            t = Thread(target=UAClient.createallsub,args=(Values.cl,))
-            t.start()
+            UAClient.createallsub(Values.cl)
+
         except BaseException as e:
             print(e)
 
     def unsubno(self):
         try:
-            t = Thread(target=Values.cl.unsub())
+            t = Thread(target=Values.cl.unsub)
             t.start()
         except BaseException as e:
             print(e)
@@ -148,8 +147,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
             val = self.AInum.toPlainText()
             if val:
                 UAClient.AIauto(Values.cl, val.strip())
+                
             else:
                 UAClient.AIauto(Values.cl, 'asc')
+                
         except Exception as e:
             print(e)
 
@@ -168,8 +169,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         if val2 != '':
             cond[self.IOlist2.currentText()] = val2
         try:
-            t = Thread(target=UAClient.DIauto, args=(Values.cl, cond, div, wit,))
-            t.start()
+            UAClient.DIauto(Values.cl, cond, div, wit)
+            
         except BaseException as e:
             print(e)
 
@@ -180,18 +181,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
             Values.cl.dbunit = self.dbunitc.text()
         except Exception as e:
             print(e)
-
+        
 
     def zread(self):
         nodes = self.Node.toPlainText().replace('\n', '').split(',')
         att = self.attr.toPlainText()
         try:
-            for node in nodes:
-                if ':' in node:
-                    node = node.split(':')
-                    Values.cl.get_Value(node[1], att, dbunit=node[0])
-                else:
-                    Values.cl.get_Value(node, att)
+            if att:
+                for node in nodes:
+                    if ':' in node:
+                        node = node.split(':')
+                        Values.cl.get_Value(node[1], att, dbunit=node[0])
+                    else:
+                        Values.cl.get_Value(node, att)
+            else:
+                for node in nodes:
+                    if ':' in node:
+                        node = node.split(':')
+                        Values.cl.read_Value(node[1], dbunit=node[0])
+                    else:
+                        Values.cl.read_Value(node)
+
         except BaseException as e:
             print(e)
 
@@ -199,21 +209,37 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
         nodes = self.Node.toPlainText().replace('\n', '').split(',')
         att = self.attr.toPlainText()
         val = self.value.toPlainText()
-        try:            
-            if '.' in val:
-                for node in nodes:
-                    if ':' in node:
-                        node = node.split(':')
-                        Values.cl.set_Value(node[1], att, float(val), dbunit=node[0])
-                    else:
-                        Values.cl.set_Value(node, att, float(val))
+        try:
+            if att:
+                if '.' in val:
+                    for node in nodes:
+                        if ':' in node:
+                            node = node.split(':')
+                            Values.cl.set_Value(node[1], att, float(val), dbunit=node[0])
+                        else:
+                            Values.cl.set_Value(node, att, float(val))
+                else:
+                    for node in nodes:
+                        if ':' in node:
+                            node = node.split(':')
+                            Values.cl.set_Value(node[1], att, int(val), dbunit=node[0])
+                        else:
+                            Values.cl.set_Value(node, att, int(val))
             else:
-                for node in nodes:
-                    if ':' in node:
-                        node = node.split(':')
-                        Values.cl.set_Value(node[1], att, int(val), dbunit=node[0])
-                    else:
-                        Values.cl.set_Value(node, att, int(val))
+                if '.' in val:
+                    for node in nodes:
+                        if ':' in node:
+                            node = node.split(':')
+                            Values.cl.write_Value(node[1], float(val), dbunit=node[0])
+                        else:
+                            Values.cl.write_Value(node, float(val))
+                else:
+                    for node in nodes:
+                        if ':' in node:
+                            node = node.split(':')
+                            Values.cl.write_Value(node[1], int(val), dbunit=node[0])
+                        else:
+                            Values.cl.write_Value(node, int(val))
 
         except BaseException as e:
             print(e)
@@ -235,8 +261,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                         num = ''
                         j = 0
 
-                print('寄存器\t| 16进制\t| 2进制\t\t| 10进制\t| 高8位\t| 低8位\t| unicode')
-                print('-'*110)
+                print('寄存器\t| 16进制\t| 2进制               \t| 10进制\t| 高8位\t| 低8位\t| unicode')
+                print('-'*100)
                 for i in range(len(hex16)):
                     print(str(i+1),end='\t| ')
                     print(hex16[i], end = '\t| ')
@@ -248,7 +274,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
                         print(' '+('\\u'+hex16[i]).encode().decode('unicode_escape'))
                     except:
                         print("error")
-                    print('-'*110)
+                    print('-'*100)
                 print('**')
             except Exception as e:
                 print(e)
@@ -256,6 +282,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):#主窗体
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         Values.winexit = False
+        
         Values.cl.ClientDisconnect()
         Values.bcl.ClientDisconnect()
         # print('退出中......')
@@ -299,3 +326,4 @@ if __name__ == '__main__':
     Main_ui = MainWindow()
     Main_ui.show()
     app.exec_()
+    

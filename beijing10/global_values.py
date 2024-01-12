@@ -1,10 +1,10 @@
 dbunit = ''#'2002,1102,1202,1402,1602,1802,2202,2402,2502,2702,2902,3102,3202'#以逗号，分割
 socname = ''#'SOC_AZM90TEST,SOC_BGZ90TEST,SOC_SZJ90TEST,SOC_ZCI90TEST,SOC_XTC90TEST,SOC_JDM90TEST,SOC_SYJ90TEST,SOC_SYQ90TEST,SOC_LMQ90TEST,SOC_TJH90TEST,SOC_JTX90TEST,SOC_SJZ90TEST,SOC_JSZ90TEST' #SOC_ZCI90TEST
 
-keyword_open = ["OPEN","STOP"] #分闸关键字
+keyword_open =  ["OPEN","STOP"] #分闸关键字
 keyword_close = ["CLOSE","START"] #合闸关键字
-device_open = ["分位"] #装置分闸状态描述（以顺控卡片中为准）
-device_close = ["合位"] #装置合闸状态描述
+device_open =   ["分位"] #装置分闸状态描述（以顺控卡片中为准）
+device_close =  ["合位"] #装置合闸状态描述
 
 attribute = {
     "顺控设备ID" : "cmdPreList.szObject",

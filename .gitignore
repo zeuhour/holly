@@ -1,2 +1,8 @@
 .venv/
 .QT_View/log/
+.build/
+.dist/
+.idea/
+.launch.spec
+.log/
+.vscode/

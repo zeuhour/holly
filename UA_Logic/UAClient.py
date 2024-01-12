@@ -15,7 +15,7 @@ def nprintf(*args,  level = "INFO", end = " "):
     datatime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     caller = getframeinfo(stack()[1][0])
     message = end.join(["{}".format(i) for i in args])
-    str = "{} - {}:{}".format(datatime, level, message)
+    str = f"{datatime} - {level}:{message}"
     print(str)
 
 
@@ -28,8 +28,10 @@ def getcolnm(path) -> dict:
         nprintf('空路径')
         raise Exception('空路径')
     try:
-        xl = xlrd.open_workbook(path, encoding_override=True)
-        Values.iolist = xl.sheet_by_name("IO List(点表)")
+        if Values.xl:
+            del Values.xl
+        Values.xl = xlrd.open_workbook(path, encoding_override=True)
+        Values.iolist = Values.xl.sheet_by_name("IO List(点表)")
         iolist = Values.iolist
         for i in range(iolist.ncols):
             for j in range(2):
@@ -205,17 +207,18 @@ def checkip(ip:str) ->bool:
     return True
 
 class UAclient:
-    dbunit = ''
-    client = ''
-    Hander = SubHandler()
-    rcHander = returncheckHandler()
-    returncheckhandler = rcHandler()
-    rcnodes = []
-    sub = []
-    rsub = []
-    goodcl = False
-    constatus = False
-
+    def __init__(self):
+        self.dbunit = ''
+        self.client = ''
+        self.Hander = SubHandler()
+        self.rcHander = returncheckHandler()
+        self.returncheckhandler = rcHandler()
+        self.rcnodes = []
+        self.sub = []
+        self.rsub = []
+        self.goodcl = False
+        self.constatus = False
+    
 
     def getclient(self, uaclient):
         try:
@@ -256,8 +259,8 @@ class UAclient:
                         nprintf("订阅失效，请重新订阅")
                         self.sub=[]
                         self.su.delete()
-                    self.unsub()
-                    self.unrcsub()
+                        self.unsub()
+                        self.unrcsub()
                     self.ClientConnect()
 
             time.sleep(5)
@@ -345,6 +348,20 @@ class UAclient:
             nprintf('UAClient::get_Value:'+str(e), level='ERROR')
             log.error('UAClient::get_Value:'+ str(var) + str(e))  #
             return False
+        
+    def read_Value(self, node, dbunit = None):
+        try:
+            if dbunit is None:
+                dbunit = self.dbunit
+            var = self.client.get_node("ns=" + dbunit + ";s=" + node)
+            v = var.get_value()
+            nprintf('UAClient::read_Value:'+str(var) + ' = ' + str(v))
+            #log.info('UAClient::get_Value:'+str(var) + ' = ' + str(v))
+            return v
+        except BaseException as e:
+            nprintf('UAClient::read_Value:'+str(e), level='ERROR')
+            log.error('UAClient::get_Value:'+ str(var) + str(e))  #
+            return False
 
     # 写值，点、属性、值
     def set_Value(self, node, attr, value, dbunit = None) -> bool:
@@ -362,6 +379,23 @@ class UAclient:
         except BaseException as e:
             nprintf('UAClient::set_Value:' + str(e), level='ERROR')
             log.error('UAClient::set_Value:' + str(var) + str(e))
+            return False
+
+    def write_Value(self, node, value, dbunit = None) -> bool:
+        try:
+            if dbunit is None:
+                dbunit = self.dbunit
+            var = self.client.get_node("ns=" + dbunit + ";s=" + node)
+            var.set_attribute(ua.AttributeIds.Value,
+                               ua.DataValue(variant=ua.Variant(value=value,
+                                                               varianttype=var.get_data_type_as_variant_type())))
+            #var.set_value(value)
+            nprintf(str(var) + ' = ' + str(value))
+            #log.info(str(var) + ' = ' + str(value))
+            return True
+        except BaseException as e:
+            nprintf('UAClient::write_Value:' + str(e), level='ERROR')
+            log.error('UAClient::write_Value:' + str(var) + str(e))
             return False
 
     def read(self, node, attr):
@@ -388,3 +422,15 @@ class UAclient:
         except BaseException as e:
             nprintf(f'写点错误:{str(e)}{str(node)} = {value}', level='ERROR')
             log.error(f'写点错误:{str(e)}{str(node)} = {value}')
+
+    def Oreset(self):
+        ...
+
+    def get_description(self, node, dbunit = None):
+        if dbunit is None:
+            dbunit = self.dbunit
+        try:
+            var = self.client.get_node(node)
+            return var.get_description()
+        except:
+            nprintf("获取描述失败", level="ERROR")
